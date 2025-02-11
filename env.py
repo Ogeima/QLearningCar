@@ -103,7 +103,7 @@ class Action(Enum):
 
 class Env:
     def __init__(self):
-        self.initialize()
+        print("Please initliaize this environment before using it.")
 
     def initialize(self):
         self.car = Car(150, 150, random.random() * math.pi / 2)
@@ -120,6 +120,7 @@ class Env:
             ((199, 300), (601, 300)),
         ]
         self.walls = [Wall(c[0], c[1]) for c in wall_coords]
+        return self.state()
 
     def state(self, window=None): # O(n²) -> Si j'ai le temps un jour il faudra améliorer ça...
         res = []
@@ -141,13 +142,14 @@ class Env:
             for r in res:
                 if r[0] is not None:
                     pygame.draw.line(window, (100, 100, 100), (self.car.x, self.car.y), (r[0][0], r[0][1]))
+
         return list(map(lambda x: x[1], res))
                 
     def step(self, action: Action, window = None) -> int:
         """
             Retourne la récompense donné à l'agent sous la forme d'un entier
         """
-        if self.crash: return -10
+        if self.crash: return -10, self.state(), self.crash
 
         if action == Action.LEFT:
             self.car.turn(-0.02)
@@ -160,8 +162,9 @@ class Env:
         for r in res:
             if r < 5: # Si la voiture touche un mur
                 self.crash = True
-                return -10
-        return 1
+                return -10, res, self.crash
+
+        return 1, res, self.crash
 
     def display(self, window):
         self.car.display(window)
@@ -171,7 +174,7 @@ class Env:
 #############################################################################################
 
 
-def test():
+def test_env(agent = None):
     pygame.init()
     background_color = (0, 0, 0)
 
@@ -179,6 +182,7 @@ def test():
     pygame.display.set_caption("Q-Car")
     
     env = Env()
+    state = env.initialize()
 
     font = pygame.font.Font(None, 28)
     restart_text = font.render("space to restart", True, (150, 150, 150))
@@ -191,7 +195,19 @@ def test():
                 run = False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
-                    env.initialize()
+                    state = env.initialize()
+
+
+        action = Action.FORWARD
+        if agent is not None:
+            a = int(agent.choose_action(agent.create_suitable_inputs([state])))
+            if a == 0:
+                action = Action.LEFT
+            elif a == 1:
+                action = Action.FORWARD
+            elif a == 2:
+                action = Action.RIGHT
+            
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT] and keys[pygame.K_RIGHT]:
@@ -200,14 +216,12 @@ def test():
             action = Action.LEFT
         elif keys[pygame.K_RIGHT]:
             action = Action.RIGHT
-        else:
-            action = Action.FORWARD
 
         win.fill(background_color)
         win.blit(restart_text, (10, 5))
         win.blit(arrow_text, (10, 25))
 
-        reward = env.step(action, win)
+        reward, state, done = env.step(action, win)
         reward_text = font.render("reward : " + str(reward), True, (150, 150, 150))
         win.blit(reward_text, (10, 500 - 30))
 
@@ -218,4 +232,4 @@ def test():
     pygame.quit()
 
 if __name__ == "__main__":
-    test()
+    test_env()
