@@ -102,9 +102,6 @@ class Action(Enum):
     RIGHT = 2
 
 class Env:
-    def __init__(self):
-        print("Please initliaize this environment before using it.")
-
     def initialize(self):
         self.car = Car(150, 150, random.random() * math.pi / 2)
         self.crash = False
