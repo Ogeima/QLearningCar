@@ -5,7 +5,7 @@ from collections import deque
 from env import Env, test_env, Action
 
 LEARNING_RATE = 1e-3
-BATCH_SIZE = 128
+BATCH_SIZE = 64
 
 class Memory:
     """
@@ -39,9 +39,9 @@ class Agent():
 
         self.epsilon = 0.99
         self.minimum_epsilon = 0.05
-        self.epsilon_decay = 0.9999
+        self.epsilon_decay = 0.99999
 
-        self.gamma = 0.9
+        self.gamma = 0.8
 
 
     def create_suitable_inputs(self, states):
@@ -92,7 +92,7 @@ class Agent():
                     # Bellman equation ig?? x)
                     q2 = self.model(self.create_suitable_inputs([x[3] for x in game_steps]))
                     real_q1 = tf.cast(rewards, dtype=tf.float64)\
-                        + tf.cast(self.gamma*0.1, dtype=tf.float64) * tf.cast(tf.math.argmax(q2, axis=1), dtype=tf.float64)
+                        + tf.cast(self.gamma, dtype=tf.float64) * tf.cast(tf.math.argmax(q2, axis=1), dtype=tf.float64)
 
                     loss = tf.reduce_mean(tf.math.pow(q1_action - real_q1, 2))
                     # print(loss)
@@ -103,7 +103,7 @@ class Agent():
 def test_model():
     agent = Agent(5, 3)
     env = Env()
-    # agent.train(env)
+    agent.train(env)
     test_env(agent)
 
 

@@ -1,6 +1,7 @@
 import math
 import random
 from enum import Enum
+import statistics
 import pygame
 
 
@@ -161,7 +162,7 @@ class Env:
                 self.crash = True
                 return -10, res, self.crash
 
-        return 1, res, self.crash
+        return min(res) / 20, res, self.crash
 
     def display(self, window):
         self.car.display(window)
@@ -224,7 +225,7 @@ def test_env(agent = None):
 
         env.display(win)
         pygame.display.update()
-        pygame.time.wait(4)
+        pygame.time.wait(10)
 
     pygame.quit()
 
