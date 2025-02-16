@@ -104,7 +104,8 @@ class Action(Enum):
 
 class Env:
     def initialize(self):
-        self.car = Car(150, 150, random.random() * math.pi / 2)
+        # self.car = Car(150, 150, random.random() * math.pi / 2)
+        self.car = Car(300, 150, 0 + random.random() - 0.5)
         self.crash = False
         wall_coords = [
             ((100, 99), (100, 401)),
@@ -147,7 +148,7 @@ class Env:
         """
             Retourne la récompense donné à l'agent sous la forme d'un entier
         """
-        if self.crash: return -10, self.state(), self.crash
+        if self.crash: return -2, self.state(), self.crash
 
         if action == Action.LEFT:
             self.car.turn(-0.02)
@@ -160,7 +161,7 @@ class Env:
         for r in res:
             if r < 5: # Si la voiture touche un mur
                 self.crash = True
-                return -10, res, self.crash
+                return -2, res, self.crash
 
         return min(res) / 20, res, self.crash
 
@@ -225,7 +226,7 @@ def test_env(agent = None):
 
         env.display(win)
         pygame.display.update()
-        pygame.time.wait(10)
+        pygame.time.wait(4)
 
     pygame.quit()
 
